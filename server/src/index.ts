@@ -13,6 +13,9 @@ import sdkRoutes from './routes/sdk';
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Trust proxy (nginx) for correct protocol/host detection
+app.set('trust proxy', true);
+
 app.use(cors());
 app.use(express.json());
 

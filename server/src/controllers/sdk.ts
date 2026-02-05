@@ -13,6 +13,20 @@ const SDK_SCRIPT = `
     var flushTimer = null;
     var initialized = false;
 
+    function getScriptOrigin() {
+      try {
+        var scripts = document.getElementsByTagName('script');
+        for (var i = 0; i < scripts.length; i++) {
+          var src = scripts[i].src || '';
+          if (src.indexOf('/sdk') !== -1 && src.indexOf('.js') !== -1) {
+            var url = new URL(src);
+            return url.origin;
+          }
+        }
+      } catch (e) {}
+      return null;
+    }
+
     function getOrCreateVisitorId() {
       var key = '_a_vid';
       var id = localStorage.getItem(key);
@@ -116,10 +130,10 @@ const SDK_SCRIPT = `
     function init(opts) {
       if (initialized) return;
       config.apiKey = opts.apiKey;
-      config.endpoint = opts.endpoint || window.location.origin;
+      config.endpoint = opts.endpoint || getScriptOrigin() || window.location.origin;
       config.debug = opts.debug || false;
       initialized = true;
-      log('Initialized');
+      log('Initialized with endpoint:', config.endpoint);
       if (opts.autoTrack !== false) setupAutoTracking();
       trackPageview();
     }
@@ -161,10 +175,8 @@ export async function getSDKScriptWithKey(req: Request, res: Response) {
     return res.status(404).send('// Invalid API key');
   }
 
-  const endpoint = `${req.protocol}://${req.get('host')}`;
-
   const script = SDK_SCRIPT.trim() + `
-Analytics.init({ apiKey: '${apiKey}', endpoint: '${endpoint}' });
+Analytics.init({ apiKey: '${apiKey}' });
 `;
 
   res.setHeader('Content-Type', 'application/javascript');
@@ -184,16 +196,15 @@ export async function getSnippet(req: Request, res: Response) {
     return res.status(404).json({ error: 'Site not found' });
   }
 
-  const endpoint = `${req.protocol}://${req.get('host')}`;
+  const host = req.get('x-forwarded-host') || req.get('host') || 'YOUR_ANALYTICS_HOST';
+  const proto = req.get('x-forwarded-proto') || req.protocol || 'https';
+  const baseUrl = `${proto}://${host}`;
 
-  const simpleSnippet = `<script src="${endpoint}/sdk/${site.apiKey}.js"></script>`;
+  const simpleSnippet = `<script src="${baseUrl}/sdk/${site.apiKey}.js"></script>`;
 
-  const fullSnippet = `<script src="${endpoint}/sdk.js"></script>
+  const fullSnippet = `<script src="${baseUrl}/sdk.js"></script>
 <script>
-  Analytics.init({
-    apiKey: '${site.apiKey}',
-    endpoint: '${endpoint}'
-  });
+  Analytics.init({ apiKey: '${site.apiKey}' });
 </script>`;
 
   res.json({
