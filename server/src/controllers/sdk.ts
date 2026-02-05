@@ -36,7 +36,7 @@ const SDK_SCRIPT = `
           return;
         }
         var xhr = new XMLHttpRequest();
-        xhr.open('GET', 'https://ifconfig.me/ip', true);
+        xhr.open('GET', 'https://api.ipify.org', true);
         xhr.timeout = 3000;
         xhr.onreadystatechange = function() {
           if (xhr.readyState === 4 && xhr.status === 200) {
