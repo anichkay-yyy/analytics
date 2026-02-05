@@ -32,18 +32,23 @@ function getGeoFromIp(ip: string | undefined): { country: string | null; city: s
 export async function trackEvent(req: ApiKeyRequest, res: Response) {
   try {
     const siteId = req.siteId!;
-    const { type, name, url, referrer, data, visitorId, sessionId } = req.body as TrackEventPayload;
+    const { type, name, url, referrer, data, visitorId, sessionId, geo } = req.body as TrackEventPayload & { geo?: { ip?: string; country?: string; city?: string } };
 
     if (!type || !visitorId) {
       return res.status(400).json({ error: 'Type and visitorId required' });
     }
 
+    // Используем IP от клиента (ifconfig.me) если есть, иначе из заголовков
     const forwardedFor = req.headers['x-forwarded-for'] as string;
     const realIp = req.headers['x-real-ip'] as string;
-    // X-Forwarded-For может содержать цепочку IP, берём первый (оригинальный клиент)
-    const ip = (forwardedFor?.split(',')[0]?.trim()) || realIp || req.socket.remoteAddress;
+    const serverIp = (forwardedFor?.split(',')[0]?.trim()) || realIp || req.socket.remoteAddress;
 
-    console.log('[Track] IP detection:', { forwardedFor, realIp, socket: req.socket.remoteAddress, resolved: ip });
+    // Приоритет: IP от клиента > IP из заголовков
+    const ip = geo?.ip || serverIp;
+
+    // Определяем гео по IP
+    const { country, city } = getGeoFromIp(ip);
+
     const userAgent = req.headers['user-agent'];
 
     let currentSessionId = sessionId;
@@ -63,7 +68,6 @@ export async function trackEvent(req: ApiKeyRequest, res: Response) {
       if (recentSession) {
         currentSessionId = recentSession.id;
       } else {
-        const { country, city } = getGeoFromIp(ip);
         const newSession = await prisma.session.create({
           data: {
             siteId,

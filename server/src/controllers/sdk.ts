@@ -9,6 +9,7 @@ const SDK_SCRIPT = `
     var config = { apiKey: '', endpoint: '', debug: false };
     var visitorId = getOrCreateVisitorId();
     var sessionId = null;
+    var geoData = null;
     var queue = [];
     var flushTimer = null;
     var initialized = false;
@@ -25,6 +26,29 @@ const SDK_SCRIPT = `
         }
       } catch (e) {}
       return null;
+    }
+
+    function fetchGeoData() {
+      try {
+        var cached = sessionStorage.getItem('_a_ip');
+        if (cached) {
+          geoData = { ip: cached };
+          return;
+        }
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', 'https://ifconfig.me/ip', true);
+        xhr.timeout = 3000;
+        xhr.onreadystatechange = function() {
+          if (xhr.readyState === 4 && xhr.status === 200) {
+            var ip = xhr.responseText.trim();
+            if (ip) {
+              geoData = { ip: ip };
+              sessionStorage.setItem('_a_ip', ip);
+            }
+          }
+        };
+        xhr.send();
+      } catch (e) {}
     }
 
     function getOrCreateVisitorId() {
@@ -55,7 +79,7 @@ const SDK_SCRIPT = `
           if (res.sessionId && !sessionId) sessionId = res.sessionId;
         }
       };
-      xhr.send(JSON.stringify(Object.assign({}, event, { visitorId: visitorId, sessionId: sessionId })));
+      xhr.send(JSON.stringify(Object.assign({}, event, { visitorId: visitorId, sessionId: sessionId, geo: geoData })));
     }
 
     function queueEvent(event) {
@@ -133,6 +157,7 @@ const SDK_SCRIPT = `
       config.endpoint = opts.endpoint || getScriptOrigin() || window.location.origin;
       config.debug = opts.debug || false;
       initialized = true;
+      fetchGeoData();
       log('Initialized with endpoint:', config.endpoint);
       if (opts.autoTrack !== false) setupAutoTracking();
       trackPageview();
