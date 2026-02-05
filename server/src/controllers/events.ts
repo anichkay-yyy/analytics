@@ -5,12 +5,18 @@ import { prisma } from '../services/prisma';
 import { ApiKeyRequest } from '../middlewares/apiKey';
 import { TrackEventPayload } from '../types';
 
-function getGeoFromIp(ip: string | undefined) {
+function getGeoFromIp(ip: string | undefined): { country: string | null; city: string | null } {
   if (!ip) return { country: null, city: null };
 
-  // Handle localhost/private IPs
-  const cleanIp = ip.split(',')[0].trim();
-  if (cleanIp === '127.0.0.1' || cleanIp === '::1' || cleanIp.startsWith('192.168.') || cleanIp.startsWith('10.')) {
+  const cleanIp = ip.trim();
+
+  // Skip private/local IPs
+  if (cleanIp === '127.0.0.1' || cleanIp === '::1' ||
+      cleanIp.startsWith('192.168.') || cleanIp.startsWith('10.') ||
+      cleanIp.startsWith('172.16.') || cleanIp.startsWith('172.17.') ||
+      cleanIp.startsWith('172.18.') || cleanIp.startsWith('172.19.') ||
+      cleanIp.startsWith('172.2') || cleanIp.startsWith('172.30.') ||
+      cleanIp.startsWith('172.31.')) {
     return { country: null, city: null };
   }
 
@@ -32,7 +38,12 @@ export async function trackEvent(req: ApiKeyRequest, res: Response) {
       return res.status(400).json({ error: 'Type and visitorId required' });
     }
 
-    const ip = req.headers['x-forwarded-for'] as string || req.socket.remoteAddress;
+    const forwardedFor = req.headers['x-forwarded-for'] as string;
+    const realIp = req.headers['x-real-ip'] as string;
+    // X-Forwarded-For может содержать цепочку IP, берём первый (оригинальный клиент)
+    const ip = (forwardedFor?.split(',')[0]?.trim()) || realIp || req.socket.remoteAddress;
+
+    console.log('[Track] IP detection:', { forwardedFor, realIp, socket: req.socket.remoteAddress, resolved: ip });
     const userAgent = req.headers['user-agent'];
 
     let currentSessionId = sessionId;
