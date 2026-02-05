@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   anich-analytics-db:
     image: postgres:15-alpine
@@ -8,16 +6,12 @@ services:
       POSTGRES_USER: anich_analytics
       POSTGRES_PASSWORD: anich_analytics123
       POSTGRES_DB: anich_analytics
-    ports:
-      - "5432:5432"
     volumes:
       - anich_analytics_db_data:/var/lib/postgresql/data
 
   anich-analytics:
     build: ./server
     container_name: anich-analytics
-    ports:
-      - "33003:3000"
     environment:
       DATABASE_URL: postgresql://anich_analytics:anich_analytics123@anich-analytics-db:5432/anich_analytics
       ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@example.com}
@@ -26,6 +20,14 @@ services:
       - anich_analytics_data:/app/data
     depends_on:
       - anich-analytics-db
+
+  anich-analytics-admin:
+    build: ./admin
+    container_name: anich-analytics-admin
+    ports:
+      - "33003:80"
+    depends_on:
+      - anich-analytics
 
 volumes:
   anich_analytics_db_data:

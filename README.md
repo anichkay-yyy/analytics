@@ -1,76 +1,58 @@
-# Analytics Service
+# Anich Analytics
 
 Сервис веб-аналитики с админкой и встраиваемыми виджетами.
+
+## Быстрый старт
+
+```bash
+# Клонировать
+git clone git@github.com:anichkay-yyy/analytics.git
+cd analytics
+
+# Настроить (опционально)
+cp .env.example .env
+nano .env  # изменить ADMIN_EMAIL и ADMIN_PASSWORD
+
+# Запустить
+sudo docker compose up -d --build
+```
+
+Админка: `http://localhost:33003`
+
+Логин по умолчанию: `admin@example.com` / `admin123`
 
 ## Структура
 
 ```
-├── server/          # API сервер (Node.js + Express + Prisma)
-├── admin/           # React админка (Vite + Shadcn UI)
+├── server/     # API (Node.js + Express + Prisma)
+├── admin/      # Админка (React + Vite + Shadcn UI)
 └── docker-compose.yml
-```
-
-## Быстрый старт
-
-### 1. Запуск сервера
-
-```bash
-cd server
-cp .env.example .env
-npm install
-npm run db:push
-npm run dev
-```
-
-### 2. Запуск админки
-
-```bash
-cd admin
-npm install
-npm run dev
-```
-
-- Сервер: `http://localhost:3000`
-- Админка: `http://localhost:5173`
-- Логин: `admin@example.com` / `admin123`
-
-### Docker
-
-```bash
-docker-compose up -d
 ```
 
 ## Использование
 
-### 1. Создание сайта
+### 1. Создать сайт
 
 В админке: **Sites → Add Site** → ввести название и домен.
 
-После создания автоматически откроется диалог с кодом для вставки.
+После создания откроется код для вставки.
 
-### 2. Установка на сайт
+### 2. Установить на сайт
 
-Добавь одну строку перед `</body>`:
+Добавить перед `</body>`:
 
 ```html
-<script src="http://localhost:3000/sdk/ak_ваш_ключ.js"></script>
+<script src="https://your-analytics.com/sdk/YOUR_API_KEY.js"></script>
 ```
-
-Готово! Аналитика начнёт собираться автоматически.
 
 ### 3. Кастомные события
 
 ```javascript
-// Трекинг события
 Analytics.track('button_click', { buttonId: 'signup' });
-
-// Идентификация пользователя
 Analytics.identify('user_123', { email: 'user@example.com' });
 ```
 
 ### 4. Автотрекинг кликов
-
-Добавь атрибут `data-analytics` к элементам:
 
 ```html
 <button data-analytics="signup_click" data-analytics-plan="free">
@@ -80,27 +62,23 @@ Analytics.identify('user_123', { email: 'user@example.com' });
 
 ## Виджеты для iframe
 
-Встраиваемые виджеты для дашбордов:
-
-| Виджет | URL | Описание |
-|--------|-----|----------|
-| Stats | `/widget/stats?siteId=...` | Карточки: просмотры, сессии, посетители |
+| Виджет | Путь | Описание |
+|--------|------|----------|
+| Stats | `/widget/stats?siteId=...` | Просмотры, сессии, посетители |
 | Chart | `/widget/chart?siteId=...` | График просмотров |
 | Pages | `/widget/pages?siteId=...` | Топ страниц |
 | Realtime | `/widget/realtime?siteId=...` | Live-статистика |
-
-Пример:
+| Docs | `/widget/docs` | Документация |
 
 ```html
-<iframe
-  src="http://localhost:5173/widget/stats?siteId=YOUR_SITE_ID"
-  width="100%"
-  height="150"
-  frameborder="0"
-></iframe>
+<iframe src="https://your-analytics.com/widget/stats?siteId=SITE_ID" width="100%" height="150" frameborder="0"></iframe>
 ```
 
+Список виджетов: `GET /api/widgets`
+
 ## API
+
+Все эндпоинты доступны по `/api/...`
 
 ### Auth
 - `POST /api/auth/login` — вход
@@ -122,8 +100,41 @@ Analytics.identify('user_123', { email: 'user@example.com' });
 - `GET /api/stats/sites/:id` — статистика сайта
 - `GET /api/stats/sites/:id/pages` — топ страниц
 - `GET /api/stats/sites/:id/referrers` — рефереры
+- `GET /api/stats/sites/:id/countries` — страны
+- `GET /api/stats/sites/:id/cities` — города
 - `GET /api/stats/sites/:id/timeline` — по дням
 
 ### SDK
 - `GET /sdk.js` — базовый скрипт
 - `GET /sdk/:apiKey.js` — скрипт с автоинициализацией
+
+### Widgets
+- `GET /api/widgets` — список виджетов
+
+## Docker
+
+```bash
+# Запуск
+sudo docker compose up -d
+
+# Пересборка
+sudo docker compose up -d --build
+
+# Логи
+sudo docker logs anich-analytics
+sudo docker logs anich-analytics-admin
+
+# Остановка
+sudo docker compose down
+```
+
+## Переменные окружения
+
+В `.env`:
+
+```env
+ADMIN_EMAIL=admin@example.com
+ADMIN_PASSWORD=your-secure-password
+```
+
+JWT секрет генерируется автоматически при первом запуске.

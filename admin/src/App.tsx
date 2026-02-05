@@ -10,6 +10,7 @@ import { StatsWidget } from '@/widgets/StatsWidget';
 import { ChartWidget } from '@/widgets/ChartWidget';
 import { PagesWidget } from '@/widgets/PagesWidget';
 import { RealtimeWidget } from '@/widgets/RealtimeWidget';
+import { DocsWidget } from '@/widgets/DocsWidget';
 
 function PrivateRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
@@ -76,6 +77,7 @@ function App() {
           <Route path="/widget/chart" element={<ChartWidget />} />
           <Route path="/widget/pages" element={<PagesWidget />} />
           <Route path="/widget/realtime" element={<RealtimeWidget />} />
+          <Route path="/widget/docs" element={<DocsWidget />} />
 
           {/* Fallback */}
           <Route path="*" element={<Navigate to="/" replace />} />
