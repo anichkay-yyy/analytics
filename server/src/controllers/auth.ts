@@ -2,8 +2,7 @@ import { Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { prisma } from '../services/prisma';
-
-const JWT_SECRET = process.env.JWT_SECRET || 'default-secret';
+import { getJwtSecret } from '../services/jwt';
 
 export async function login(req: Request, res: Response) {
   try {
@@ -25,7 +24,7 @@ export async function login(req: Request, res: Response) {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
-    const token = jwt.sign({ adminId: admin.id }, JWT_SECRET, { expiresIn: '7d' });
+    const token = jwt.sign({ adminId: admin.id }, getJwtSecret(), { expiresIn: '7d' });
 
     res.json({ token, admin: { id: admin.id, email: admin.email } });
   } catch (error) {

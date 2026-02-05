@@ -18,11 +18,13 @@ services:
       - "3000:3000"
     environment:
       DATABASE_URL: postgresql://analytics:analytics123@postgres:5432/analytics
-      JWT_SECRET: your-super-secret-key-change-in-production
-      ADMIN_EMAIL: admin@example.com
-      ADMIN_PASSWORD: admin123
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@example.com}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-admin123}
+    volumes:
+      - server_data:/app/data
     depends_on:
       - postgres
 
 volumes:
   postgres_data:
+  server_data:

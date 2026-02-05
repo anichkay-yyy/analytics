@@ -1,8 +1,7 @@
 import { Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { AuthRequest } from '../types';
-
-const JWT_SECRET = process.env.JWT_SECRET || 'default-secret';
+import { getJwtSecret } from '../services/jwt';
 
 export function authMiddleware(req: AuthRequest, res: Response, next: NextFunction) {
   const authHeader = req.headers.authorization;
@@ -14,7 +13,7 @@ export function authMiddleware(req: AuthRequest, res: Response, next: NextFuncti
   const token = authHeader.substring(7);
 
   try {
-    const decoded = jwt.verify(token, JWT_SECRET) as { adminId: string };
+    const decoded = jwt.verify(token, getJwtSecret()) as { adminId: string };
     req.adminId = decoded.adminId;
     next();
   } catch {
