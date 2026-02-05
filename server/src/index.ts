@@ -25,7 +25,7 @@ app.get('/health', (_, res) => {
 });
 
 // Debug IP detection
-app.get('/debug/ip', (req, res) => {
+app.get('/api/debug/ip', (req, res) => {
   const geoip = require('geoip-lite');
   const forwardedFor = req.headers['x-forwarded-for'] as string;
   const realIp = req.headers['x-real-ip'] as string;
