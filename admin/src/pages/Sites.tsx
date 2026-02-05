@@ -249,7 +249,7 @@ export function Sites() {
                   Just add this single line before <code className="text-primary">&lt;/body&gt;</code>:
                 </p>
                 <div className="relative">
-                  <pre className="p-4 rounded-lg bg-black border border-border overflow-x-auto text-sm pr-12">
+                  <pre className="p-4 rounded-lg bg-black border border-border overflow-x-auto text-sm pr-12 whitespace-pre-wrap break-all">
                     <code className="text-green-400">{snippetData?.simple}</code>
                   </pre>
                   <Button

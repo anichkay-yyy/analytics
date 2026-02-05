@@ -24,6 +24,25 @@ app.get('/health', (_, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
+// Debug IP detection
+app.get('/debug/ip', (req, res) => {
+  const geoip = require('geoip-lite');
+  const forwardedFor = req.headers['x-forwarded-for'] as string;
+  const realIp = req.headers['x-real-ip'] as string;
+  const ip = (forwardedFor?.split(',')[0]?.trim()) || realIp || req.socket.remoteAddress;
+  const geo = geoip.lookup(ip);
+
+  res.json({
+    headers: {
+      'x-forwarded-for': forwardedFor,
+      'x-real-ip': realIp,
+    },
+    socketRemoteAddress: req.socket.remoteAddress,
+    resolvedIp: ip,
+    geoResult: geo
+  });
+});
+
 // SDK scripts (public)
 app.use('/', sdkRoutes);
 
