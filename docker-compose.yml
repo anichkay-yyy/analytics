@@ -15,7 +15,7 @@ services:
   server:
     build: ./server
     ports:
-      - "3000:3000"
+      - "33003:3000"
     environment:
       DATABASE_URL: postgresql://analytics:analytics123@postgres:5432/analytics
       ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@example.com}
