@@ -22,7 +22,10 @@ services:
       - anich-analytics-db
 
   anich-analytics-admin:
-    build: ./admin
+    build:
+      context: ./admin
+      args:
+        VITE_VAPID_PUBLIC_KEY: ${VITE_VAPID_PUBLIC_KEY}
     container_name: anich-analytics-admin
     ports:
       - "33003:80"
