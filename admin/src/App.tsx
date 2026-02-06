@@ -6,6 +6,7 @@ import { Dashboard } from '@/pages/Dashboard';
 import { Sites } from '@/pages/Sites';
 import { SiteDetail } from '@/pages/SiteDetail';
 import { Widgets } from '@/pages/Widgets';
+import { Settings } from '@/pages/Settings';
 import { StatsWidget } from '@/widgets/StatsWidget';
 import { ChartWidget } from '@/widgets/ChartWidget';
 import { PagesWidget } from '@/widgets/PagesWidget';
@@ -70,6 +71,7 @@ function App() {
             <Route path="/sites" element={<Sites />} />
             <Route path="/sites/:id" element={<SiteDetail />} />
             <Route path="/widgets" element={<Widgets />} />
+            <Route path="/settings" element={<Settings />} />
           </Route>
 
           {/* Widgets for iframe embedding */}
