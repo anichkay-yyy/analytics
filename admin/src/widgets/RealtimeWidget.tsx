@@ -4,11 +4,13 @@ import { Activity, Users } from 'lucide-react';
 import { api, SiteStats } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
 import { WidgetAuth } from './WidgetAuth';
+import { useSiteDomain } from './useSiteDomain';
 
 export function RealtimeWidget() {
   const [searchParams] = useSearchParams();
   const siteId = searchParams.get('siteId');
   const { user, loading: authLoading } = useAuth();
+  const domain = useSiteDomain(siteId, user);
   const [stats, setStats] = useState<SiteStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -70,6 +72,7 @@ export function RealtimeWidget() {
         <div className="flex items-center gap-2 mb-4">
           <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
           <span className="text-sm text-muted-foreground">Live — Today</span>
+          {domain && <span className="text-xs text-muted-foreground font-mono ml-auto">{domain}</span>}
         </div>
 
         <div className="grid grid-cols-2 gap-6">

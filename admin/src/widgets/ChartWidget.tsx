@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import { api } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
 import { WidgetAuth } from './WidgetAuth';
+import { useSiteDomain } from './useSiteDomain';
 import {
   AreaChart,
   Area,
@@ -16,6 +17,7 @@ export function ChartWidget() {
   const [searchParams] = useSearchParams();
   const siteId = searchParams.get('siteId');
   const { user, loading: authLoading } = useAuth();
+  const domain = useSiteDomain(siteId, user);
   const [timeline, setTimeline] = useState<{ date: string; count: number }[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -69,7 +71,10 @@ export function ChartWidget() {
   return (
     <div className="min-h-screen bg-black p-4">
       <div className="h-full min-h-[200px] rounded-xl bg-[#0C0F16] border border-border p-4">
-        <h3 className="text-sm font-medium text-muted-foreground mb-4">Pageviews Over Time</h3>
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-sm font-medium text-muted-foreground">Pageviews Over Time</h3>
+          {domain && <span className="text-xs text-muted-foreground font-mono">{domain}</span>}
+        </div>
         {timeline.length > 0 ? (
           <div className="h-[calc(100%-2rem)]" style={{ minHeight: 180 }}>
             <ResponsiveContainer width="100%" height="100%">

@@ -4,12 +4,14 @@ import { Eye, Users, UserCheck, TrendingUp, TrendingDown } from 'lucide-react';
 import { api, SiteStats } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
 import { WidgetAuth } from './WidgetAuth';
+import { useSiteDomain } from './useSiteDomain';
 import { cn } from '@/lib/utils';
 
 export function StatsWidget() {
   const [searchParams] = useSearchParams();
   const siteId = searchParams.get('siteId');
   const { user, loading: authLoading } = useAuth();
+  const domain = useSiteDomain(siteId, user);
   const [stats, setStats] = useState<SiteStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -62,6 +64,9 @@ export function StatsWidget() {
 
   return (
     <div className="min-h-screen bg-black p-4">
+      {domain && (
+        <div className="mb-3 text-xs text-muted-foreground font-mono">{domain}</div>
+      )}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <StatCard
           icon={Eye}

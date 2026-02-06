@@ -4,12 +4,14 @@ import { ExternalLink } from 'lucide-react';
 import { api } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
 import { WidgetAuth } from './WidgetAuth';
+import { useSiteDomain } from './useSiteDomain';
 
 export function PagesWidget() {
   const [searchParams] = useSearchParams();
   const siteId = searchParams.get('siteId');
   const limit = parseInt(searchParams.get('limit') || '10');
   const { user, loading: authLoading } = useAuth();
+  const domain = useSiteDomain(siteId, user);
   const [pages, setPages] = useState<{ url: string; views: number }[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -65,7 +67,10 @@ export function PagesWidget() {
   return (
     <div className="min-h-screen bg-black p-4">
       <div className="rounded-xl bg-[#0C0F16] border border-border p-4">
-        <h3 className="text-sm font-medium text-muted-foreground mb-4">Top Pages</h3>
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-sm font-medium text-muted-foreground">Top Pages</h3>
+          {domain && <span className="text-xs text-muted-foreground font-mono">{domain}</span>}
+        </div>
         {pages.length > 0 ? (
           <div className="space-y-2">
             {pages.map((page, i) => (
