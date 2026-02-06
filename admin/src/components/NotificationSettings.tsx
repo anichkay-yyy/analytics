@@ -26,24 +26,33 @@ export function NotificationSettings() {
   async function handleSubscribe() {
     setIsLoading(true)
     try {
-      // TODO: Get VAPID public key from your server
-      const VAPID_PUBLIC_KEY = 'YOUR_VAPID_PUBLIC_KEY_HERE'
+      // Get VAPID public key from server
+      const keyResponse = await fetch('/api/push/vapid-public-key')
+      if (!keyResponse.ok) {
+        throw new Error('Failed to get VAPID public key')
+      }
+      const { publicKey } = await keyResponse.json()
 
-      const subscription = await subscribeToPushNotifications(VAPID_PUBLIC_KEY)
+      const subscription = await subscribeToPushNotifications(publicKey)
 
       if (subscription) {
-        // Send subscription to your server
-        await fetch('/api/push/subscribe', {
+        // Send subscription to server
+        const response = await fetch('/api/push/subscribe', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(subscription),
         })
+
+        if (!response.ok) {
+          throw new Error('Failed to save subscription')
+        }
 
         setIsSubscribed(true)
         setPermission('granted')
       }
     } catch (error) {
       console.error('Failed to subscribe:', error)
+      alert('Failed to enable notifications. Please try again.')
     } finally {
       setIsLoading(false)
     }

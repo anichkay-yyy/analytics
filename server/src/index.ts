@@ -9,6 +9,7 @@ import sitesRoutes from './routes/sites';
 import eventsRoutes from './routes/events';
 import statsRoutes from './routes/stats';
 import sdkRoutes from './routes/sdk';
+import pushRoutes from './routes/push';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -51,6 +52,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/sites', sitesRoutes);
 app.use('/api/events', eventsRoutes);
 app.use('/api/stats', statsRoutes);
+app.use('/api/push', pushRoutes);
 
 // 404 handler
 app.use((_, res) => {
