@@ -93,6 +93,26 @@ export function Widgets() {
               </option>
             ))}
           </select>
+          {(() => {
+            const site = sites.find((s) => s.id === selectedSite);
+            if (!site) return null;
+            return (
+              <div className="mt-3 flex items-center gap-3 text-sm">
+                <div className={`w-2.5 h-2.5 rounded-full ${site.isActive ? 'bg-green-500' : 'bg-gray-500'}`} />
+                <span className="font-medium">{site.name}</span>
+                <span className="text-muted-foreground">{site.domain}</span>
+                <button
+                  type="button"
+                  className="inline-flex items-center gap-1 text-muted-foreground/60 font-mono text-xs hover:text-muted-foreground transition-colors"
+                  onClick={() => copyToClipboard(site.id, 'site-id')}
+                  title="Click to copy Site ID"
+                >
+                  ID: {site.id}
+                  {copied === 'site-id' ? <Check className="h-3 w-3 text-green-400" /> : <Copy className="h-3 w-3" />}
+                </button>
+              </div>
+            );
+          })()}
         </CardContent>
       </Card>
 

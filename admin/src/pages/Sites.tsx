@@ -196,14 +196,15 @@ export function Sites() {
                         <p className="text-sm text-muted-foreground">{site.domain}</p>
                         <button
                           type="button"
-                          className="text-xs text-muted-foreground/60 font-mono hover:text-muted-foreground transition-colors"
+                          className="inline-flex items-center gap-1 text-xs text-muted-foreground/60 font-mono hover:text-muted-foreground transition-colors"
                           onClick={(e) => {
                             e.preventDefault();
                             copyToClipboard(site.id, `site-id-${site.id}`);
                           }}
                           title="Click to copy Site ID"
                         >
-                          ID: {site.id} {copied === `site-id-${site.id}` ? '✓' : ''}
+                          ID: {site.id}
+                          {copied === `site-id-${site.id}` ? <Check className="h-3 w-3 text-green-400" /> : <Copy className="h-3 w-3" />}
                         </button>
                       </div>
                     </div>
