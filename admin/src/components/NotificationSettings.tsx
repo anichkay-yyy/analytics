@@ -8,9 +8,19 @@ import {
   getNotificationPermission,
 } from '@/lib/pwa'
 
+function isIOS(): boolean {
+  return /iPad|iPhone|iPod/.test(navigator.userAgent)
+}
+
+function isStandalone(): boolean {
+  return ('standalone' in navigator && (navigator as any).standalone === true)
+    || window.matchMedia('(display-mode: standalone)').matches
+}
+
 export function NotificationSettings() {
   const [isSubscribed, setIsSubscribed] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const [permission, setPermission] = useState<NotificationPermission>('default')
 
   useEffect(() => {
@@ -19,40 +29,30 @@ export function NotificationSettings() {
   }, [])
 
   async function checkSubscription() {
-    const subscription = await getPushSubscription()
-    setIsSubscribed(!!subscription)
+    try {
+      const subscription = await getPushSubscription()
+      setIsSubscribed(!!subscription)
+    } catch {
+      // SW not ready yet
+    }
   }
 
   async function handleSubscribe() {
     setIsLoading(true)
+    setError(null)
     try {
-      // Get VAPID public key from server
-      const keyResponse = await fetch('/api/push/vapid-public-key')
-      if (!keyResponse.ok) {
-        throw new Error('Failed to get VAPID public key')
-      }
-      const { publicKey } = await keyResponse.json()
-
-      const subscription = await subscribeToPushNotifications(publicKey)
+      const subscription = await subscribeToPushNotifications(
+        import.meta.env.VITE_VAPID_PUBLIC_KEY
+      )
 
       if (subscription) {
-        // Send subscription to server
-        const response = await fetch('/api/push/subscribe', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(subscription),
-        })
-
-        if (!response.ok) {
-          throw new Error('Failed to save subscription')
-        }
-
         setIsSubscribed(true)
         setPermission('granted')
       }
-    } catch (error) {
-      console.error('Failed to subscribe:', error)
-      alert('Failed to enable notifications. Please try again.')
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Unknown error'
+      console.error('Failed to subscribe:', message)
+      setError(message)
     } finally {
       setIsLoading(false)
     }
@@ -60,27 +60,41 @@ export function NotificationSettings() {
 
   async function handleUnsubscribe() {
     setIsLoading(true)
+    setError(null)
     try {
       const success = await unsubscribeFromPush()
       if (success) {
-        // Notify your server
-        await fetch('/api/push/unsubscribe', {
-          method: 'POST',
-        })
-
         setIsSubscribed(false)
       }
-    } catch (error) {
-      console.error('Failed to unsubscribe:', error)
+    } catch (err) {
+      console.error('Failed to unsubscribe:', err)
     } finally {
       setIsLoading(false)
     }
   }
 
+  // iOS in browser (not installed PWA)
+  if (isIOS() && !isStandalone()) {
+    return (
+      <div className="space-y-2">
+        <h3 className="text-sm font-medium">Push Notifications</h3>
+        <p className="text-sm text-muted-foreground">
+          To enable notifications on iOS, install this app first:
+        </p>
+        <ol className="text-sm text-muted-foreground list-decimal list-inside space-y-1">
+          <li>Tap the <strong>Share</strong> button in Safari</li>
+          <li>Select <strong>Add to Home Screen</strong></li>
+          <li>Open the app from Home Screen</li>
+          <li>Enable notifications in Settings</li>
+        </ol>
+      </div>
+    )
+  }
+
   if (!arePushNotificationsSupported()) {
     return (
       <div className="text-sm text-muted-foreground">
-        Push notifications are not supported in your browser
+        Push notifications are not supported in this browser
       </div>
     )
   }
@@ -88,7 +102,7 @@ export function NotificationSettings() {
   if (permission === 'denied') {
     return (
       <div className="text-sm text-muted-foreground">
-        Notifications are blocked. Please enable them in your browser settings.
+        Notifications are blocked. Please enable them in browser settings.
       </div>
     )
   }
@@ -113,6 +127,9 @@ export function NotificationSettings() {
           {isLoading ? 'Loading...' : isSubscribed ? 'Disable' : 'Enable'}
         </Button>
       </div>
+      {error && (
+        <p className="text-xs text-red-400">{error}</p>
+      )}
     </div>
   )
 }
