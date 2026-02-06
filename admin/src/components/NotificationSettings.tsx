@@ -1,12 +1,8 @@
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
-import {
-  subscribeToPushNotifications,
-  unsubscribeFromPush,
-  getPushSubscription,
-  arePushNotificationsSupported,
-  getNotificationPermission,
-} from '@/lib/pwa'
+import { notifications, createPushClient, PushClientError } from '@anichkay/pwa-lib/client'
+
+const push = createPushClient()
 
 function isIOS(): boolean {
   return /iPad|iPhone|iPod/.test(navigator.userAgent)
@@ -25,12 +21,14 @@ export function NotificationSettings() {
 
   useEffect(() => {
     checkSubscription()
-    setPermission(getNotificationPermission())
+    if ('Notification' in window) {
+      setPermission(Notification.permission)
+    }
   }, [])
 
   async function checkSubscription() {
     try {
-      const subscription = await getPushSubscription()
+      const subscription = await notifications.getSubscription()
       setIsSubscribed(!!subscription)
     } catch {
       // SW not ready yet
@@ -41,18 +39,28 @@ export function NotificationSettings() {
     setIsLoading(true)
     setError(null)
     try {
-      const subscription = await subscribeToPushNotifications(
-        import.meta.env.VITE_VAPID_PUBLIC_KEY
-      )
-
-      if (subscription) {
-        setIsSubscribed(true)
-        setPermission('granted')
-      }
+      await push.subscribe()
+      setIsSubscribed(true)
+      setPermission('granted')
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Unknown error'
-      console.error('Failed to subscribe:', message)
-      setError(message)
+      if (err instanceof PushClientError) {
+        switch (err.code) {
+          case 'PERMISSION_DENIED':
+            setPermission('denied')
+            setError('Разрешите уведомления в настройках браузера')
+            break
+          case 'NETWORK_ERROR':
+          case 'VAPID_FETCH_FAILED':
+          case 'SERVER_SUBSCRIBE_FAILED':
+            setError('Ошибка сервера. Попробуйте позже.')
+            break
+          default:
+            setError('Не удалось подписаться на уведомления')
+        }
+      } else {
+        console.error('Failed to subscribe:', err)
+        setError('Не удалось подписаться на уведомления')
+      }
     } finally {
       setIsLoading(false)
     }
@@ -62,12 +70,14 @@ export function NotificationSettings() {
     setIsLoading(true)
     setError(null)
     try {
-      const success = await unsubscribeFromPush()
-      if (success) {
-        setIsSubscribed(false)
-      }
+      await push.unsubscribe()
+      setIsSubscribed(false)
     } catch (err) {
-      console.error('Failed to unsubscribe:', err)
+      if (err instanceof PushClientError && err.code === 'SERVER_UNSUBSCRIBE_FAILED') {
+        setError('Ошибка сервера. Попробуйте позже.')
+      } else {
+        console.error('Failed to unsubscribe:', err)
+      }
     } finally {
       setIsLoading(false)
     }
@@ -91,7 +101,7 @@ export function NotificationSettings() {
     )
   }
 
-  if (!arePushNotificationsSupported()) {
+  if (!notifications.isSupported()) {
     return (
       <div className="text-sm text-muted-foreground">
         Push notifications are not supported in this browser

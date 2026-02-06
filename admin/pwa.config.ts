@@ -1,4 +1,4 @@
-import { defineConfig } from 'pwa-lib/config'
+import { defineConfig } from '@anichkay/pwa-lib/config'
 
 export default defineConfig({
   icon: './public/icon.png',
@@ -48,8 +48,10 @@ export default defineConfig({
   },
 
   notifications: {
-    defaultIcon: '/icons/icon-192.png',
-    badge: '/icons/icon-72.png',
+    serverUrl: 'https://notifications.anichkay.dev',
+    appId: 'a1d94604-282d-4e22-abfd-1c253055df29',
+    apiKey: 'pna_29c255b703c8e26b207fbb1904fa58ac696ba3d01afb657a',
+    vapidPublicKey: 'BLqaOvP6KbYuiOE0sCcj3F82VKzlLg8z9SZl3qkFsUT8buVsGRFfBl_xZ-2N7JnSs44_X7sNNuRYP5ZdslRu9pc',
   },
 
   outDir: './public/icons',
