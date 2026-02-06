@@ -194,6 +194,17 @@ export function Sites() {
                       <div>
                         <h3 className="font-medium">{site.name}</h3>
                         <p className="text-sm text-muted-foreground">{site.domain}</p>
+                        <button
+                          type="button"
+                          className="text-xs text-muted-foreground/60 font-mono hover:text-muted-foreground transition-colors"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            copyToClipboard(site.id, `site-id-${site.id}`);
+                          }}
+                          title="Click to copy Site ID"
+                        >
+                          ID: {site.id} {copied === `site-id-${site.id}` ? '✓' : ''}
+                        </button>
                       </div>
                     </div>
                   </Link>
