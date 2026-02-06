@@ -106,7 +106,7 @@ export function Sites() {
 
   if (loading) {
     return (
-      <div className="p-8">
+      <div className="p-4 md:p-8">
         <div className="animate-pulse space-y-4">
           <div className="h-8 w-32 bg-muted rounded" />
           <div className="grid gap-4">
@@ -120,7 +120,7 @@ export function Sites() {
   }
 
   return (
-    <div className="p-8">
+    <div className="p-4 md:p-8">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold">Sites</h1>
         <Dialog open={createOpen} onOpenChange={setCreateOpen}>
@@ -187,13 +187,13 @@ export function Sites() {
           {sites.map((site) => (
             <Card key={site.id}>
               <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <Link to={`/sites/${site.id}`} className="flex-1">
-                    <div className="flex items-center gap-4">
-                      <div className={`w-3 h-3 rounded-full ${site.isActive ? 'bg-green-500' : 'bg-gray-500'}`} />
-                      <div>
-                        <h3 className="font-medium">{site.name}</h3>
-                        <p className="text-sm text-muted-foreground">{site.domain}</p>
+                <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:justify-between">
+                  <Link to={`/sites/${site.id}`} className="flex-1 min-w-0">
+                    <div className="flex items-center gap-3">
+                      <div className={`w-3 h-3 shrink-0 rounded-full ${site.isActive ? 'bg-green-500' : 'bg-gray-500'}`} />
+                      <div className="min-w-0">
+                        <h3 className="font-medium truncate">{site.name}</h3>
+                        <p className="text-sm text-muted-foreground truncate">{site.domain}</p>
                         <button
                           type="button"
                           className="inline-flex items-center gap-1 text-xs text-muted-foreground/60 font-mono hover:text-muted-foreground transition-colors"
@@ -209,8 +209,8 @@ export function Sites() {
                       </div>
                     </div>
                   </Link>
-                  <div className="flex items-center gap-4">
-                    <div className="text-right text-sm">
+                  <div className="flex items-center justify-between sm:gap-4 pl-6 sm:pl-0">
+                    <div className="text-sm sm:text-right">
                       <div>{site._count?.events || 0} events</div>
                       <div className="text-muted-foreground">{site._count?.sessions || 0} sessions</div>
                     </div>

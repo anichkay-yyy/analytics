@@ -1,5 +1,6 @@
+import { useState } from 'react';
 import { Link, useLocation, Outlet } from 'react-router-dom';
-import { BarChart3, Globe, LogOut, LayoutDashboard, Code, Settings } from 'lucide-react';
+import { BarChart3, Globe, LogOut, LayoutDashboard, Code, Settings, Menu, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/context/AuthContext';
 import { cn } from '@/lib/utils';
@@ -14,13 +15,37 @@ const navItems = [
 export function Layout() {
   const { user, logout } = useAuth();
   const location = useLocation();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <div className="min-h-screen flex">
+    <div className="min-h-screen flex flex-col md:flex-row">
+      {/* Mobile header */}
+      <header className="md:hidden flex items-center justify-between px-4 py-3 bg-[#0C0F16] border-b border-border">
+        <Link to="/" className="flex items-center gap-2">
+          <BarChart3 className="h-6 w-6 text-primary" />
+          <span className="text-lg font-bold">Analytics</span>
+        </Link>
+        <Button variant="ghost" size="icon" onClick={() => setSidebarOpen(!sidebarOpen)}>
+          {sidebarOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+        </Button>
+      </header>
+
+      {/* Overlay */}
+      {sidebarOpen && (
+        <div
+          className="md:hidden fixed inset-0 z-30 bg-black/60"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
       {/* Sidebar */}
-      <aside className="w-64 bg-[#0C0F16] border-r border-border flex flex-col">
+      <aside className={cn(
+        "fixed inset-y-0 left-0 z-40 w-64 bg-[#0C0F16] border-r border-border flex flex-col transition-transform duration-200 ease-in-out",
+        "md:static md:translate-x-0",
+        sidebarOpen ? "translate-x-0" : "-translate-x-full"
+      )}>
         <div className="p-6 border-b border-border">
-          <Link to="/" className="flex items-center gap-2">
+          <Link to="/" className="flex items-center gap-2" onClick={() => setSidebarOpen(false)}>
             <BarChart3 className="h-8 w-8 text-primary" />
             <span className="text-xl font-bold">Analytics</span>
           </Link>
@@ -31,6 +56,7 @@ export function Layout() {
             <Link
               key={to}
               to={to}
+              onClick={() => setSidebarOpen(false)}
               className={cn(
                 "flex items-center gap-3 px-3 py-2 rounded-lg transition-colors",
                 location.pathname === to || (to !== '/' && location.pathname.startsWith(to))

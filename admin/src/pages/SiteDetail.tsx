@@ -63,7 +63,7 @@ export function SiteDetail() {
 
   if (loading) {
     return (
-      <div className="p-8">
+      <div className="p-4 md:p-8">
         <div className="animate-pulse space-y-4">
           <div className="h-8 w-64 bg-muted rounded" />
           <div className="grid grid-cols-3 gap-4">
@@ -78,14 +78,14 @@ export function SiteDetail() {
 
   if (!site) {
     return (
-      <div className="p-8">
+      <div className="p-4 md:p-8">
         <p>Site not found</p>
       </div>
     );
   }
 
   return (
-    <div className="p-8">
+    <div className="p-4 md:p-8">
       <div className="flex items-center gap-4 mb-6">
         <Link to="/sites">
           <Button variant="ghost" size="icon">
@@ -178,12 +178,12 @@ export function SiteDetail() {
 
       {/* Tabs */}
       <Tabs defaultValue="pages">
-        <TabsList>
-          <TabsTrigger value="pages">Top Pages</TabsTrigger>
-          <TabsTrigger value="referrers">Referrers</TabsTrigger>
-          <TabsTrigger value="countries">Countries</TabsTrigger>
-          <TabsTrigger value="cities">Cities</TabsTrigger>
-          <TabsTrigger value="events">Events</TabsTrigger>
+        <TabsList className="w-full overflow-x-auto flex">
+          <TabsTrigger value="pages" className="flex-1 min-w-0">Pages</TabsTrigger>
+          <TabsTrigger value="referrers" className="flex-1 min-w-0">Referrers</TabsTrigger>
+          <TabsTrigger value="countries" className="flex-1 min-w-0">Countries</TabsTrigger>
+          <TabsTrigger value="cities" className="flex-1 min-w-0">Cities</TabsTrigger>
+          <TabsTrigger value="events" className="flex-1 min-w-0">Events</TabsTrigger>
         </TabsList>
 
         <TabsContent value="pages">
