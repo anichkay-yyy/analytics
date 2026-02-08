@@ -2,6 +2,7 @@ services:
   anich-analytics-db:
     image: postgres:15-alpine
     container_name: anich-analytics-db
+    restart: always
     environment:
       POSTGRES_USER: anich_analytics
       POSTGRES_PASSWORD: anich_analytics123
@@ -12,6 +13,7 @@ services:
   anich-analytics:
     build: ./server
     container_name: anich-analytics
+    restart: always
     environment:
       DATABASE_URL: postgresql://anich_analytics:anich_analytics123@anich-analytics-db:5432/anich_analytics
       ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@example.com}
@@ -27,6 +29,7 @@ services:
       args:
         VITE_VAPID_PUBLIC_KEY: ${VITE_VAPID_PUBLIC_KEY}
     container_name: anich-analytics-admin
+    restart: always
     ports:
       - "33003:80"
     depends_on:
